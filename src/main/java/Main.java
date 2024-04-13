@@ -1,7 +1,9 @@
-import java.io.File;
+import java.io.*;
 import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
+
 
         int count = 0;
 
@@ -26,6 +28,44 @@ public class Main {
 
             System.out.println("Введенный путь к файлу указан верно.");
             System.out.println("Это название файла номер " + count);
+
+
+            int totalLines = 0;
+            int maxLength = 0;
+            int minLength = Integer.MAX_VALUE;
+
+            FileReader fileReader;
+            try {
+                fileReader = new FileReader(path);
+                BufferedReader reader = new BufferedReader(fileReader);
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    totalLines++;
+                    int length = line.length();
+                    if (length > 1024) {
+                        throw new OperationAttemptException("Длина текста в строке " + totalLines + " более 1024 символов");
+                    }
+                    if (length > maxLength) {
+                        maxLength = length;
+                    }
+                    if (length < minLength) {
+                        minLength = length;
+                    }
+                }
+                reader.close();
+            } catch (FileNotFoundException e) {
+                throw new OperationAttemptException("Файл не найден");
+            } catch (IOException e) {
+                throw new OperationAttemptException("Ошибка ввода или вывода");
+            } catch (OperationAttemptException e) {
+                System.out.println(e.getMessage());
+            }
+
+            System.out.println("Количество строк в файле: " + totalLines);
+            System.out.println("Длина самой длинной строки в файле: " + maxLength + " символов");
+            System.out.println("Длина самой короткой строки в файле: " + minLength + " символов");
+
         }
     }
+
 }
