@@ -1,6 +1,7 @@
 import exeptions.OperationAttemptException;
 import logs.LogEntry;
-import logs.LogParser;
+import logs.UserAgent;
+import mehtods.Statistics;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -14,11 +15,14 @@ public class Main {
     public static void main(String[] args) {
 
         int count = 0;
+        String path;
+        Statistics statistics = new Statistics();
 
         while (true) {
             System.out.print("Введите путь к файлу: ");
-            String path = new Scanner(System.in).nextLine();
+            path = new Scanner(System.in).nextLine();
             File file = new File(path);
+
             boolean fileExists = file.exists();
             boolean isDirectory = file.isDirectory();
 
@@ -42,6 +46,7 @@ public class Main {
 
             FileReader fileReader;
             try {
+
                 fileReader = new FileReader(path);
                 BufferedReader reader = new BufferedReader(fileReader);
                 String line;
@@ -51,25 +56,31 @@ public class Main {
                     if (length > 1024) {
                         throw new OperationAttemptException("Длина текста в строке " + totalLines + " более 1024 символов");
                     }
-                    //Задание2
+
                     List<LogEntry> logDataList = new ArrayList<>();
 
-                    LogEntry logData = LogParser.parseLogLine(line);
+                    LogEntry logData = new LogEntry(line);
                     if (logData != null) {
                         logDataList.add(logData);
+                        statistics.addEntry(logData);
                     }
 
-                    String botNameFromUserAgent = LogParser.extractBotNameFromUserAgent(logData.getUserAgent());
-                    if (botNameFromUserAgent != null) {
-                        if (LogEntry.checkUserAgent(botNameFromUserAgent, YANDEX_BOT_NAME)) {
-                            yandexBotCount++;
-                        }
+                    if (logData.getUserAgentFullData() != null || logData.getUserAgentFullData().equals("-")) {
+                        UserAgent userAgent = new UserAgent(logData.getUserAgentFullData());
+                        String botNameFromUserAgent = userAgent.getBotName();
+                        if (botNameFromUserAgent != null) {
+                            if (LogEntry.checkUserAgent(botNameFromUserAgent, YANDEX_BOT_NAME)) {
+                                yandexBotCount++;
+                            }
 
-                        if (LogEntry.checkUserAgent(botNameFromUserAgent, GOOGLE_BOT_NAME)) {
-                            googleBotCount++;
+                            if (LogEntry.checkUserAgent(botNameFromUserAgent, GOOGLE_BOT_NAME)) {
+                                googleBotCount++;
+                            }
                         }
                     }
+
                 }
+                statistics.getTrafficRate();
                 reader.close();
             } catch (FileNotFoundException e) {
                 throw new OperationAttemptException("Файл не найден");
@@ -78,15 +89,16 @@ public class Main {
             } catch (OperationAttemptException e) {
                 System.out.println(e.getMessage());
             }
+
             int totalBotCount = yandexBotCount + googleBotCount;
 
             System.out.println("Количество строк в файле: " + totalLines);
-            System.out.println("Количество totalBotCount : " + totalBotCount);
+            System.out.println("Сумма YandexBot и Googlebot составляет: " + totalBotCount);
             System.out.println("Количество запросов от " + YANDEX_BOT_NAME + " составляет : " + yandexBotCount);
             System.out.println("Количество запросов от " + GOOGLE_BOT_NAME + " составляет : " + googleBotCount);
             System.out.println("Доля запросов от " + YANDEX_BOT_NAME + " составляет : " + String.format("%.2f", (yandexBotCount * 1.0 / totalBotCount)));
             System.out.println("Доля запросов от " + GOOGLE_BOT_NAME + " составляет : " + String.format("%.2f", (googleBotCount * 1.0 / totalBotCount)));
-
+            break;
         }
 
     }
