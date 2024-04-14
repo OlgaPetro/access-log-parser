@@ -1,3 +1,5 @@
+package exeptions;
+
 public class OperationAttemptException extends RuntimeException {
 
     public OperationAttemptException() {

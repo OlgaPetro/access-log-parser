@@ -1,12 +1,18 @@
+import exeptions.OperationAttemptException;
+import logs.LogEntry;
+import logs.LogParser;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static constants.Constants.GOOGLE_BOT_NAME;
+import static constants.Constants.YANDEX_BOT_NAME;
+
 public class Main {
     public static void main(String[] args) {
-        final String YANDEX_BOT_NAME = "YandexBot";
-        final String GOOGLE_BOT_NAME = "Googlebot";
+
         int count = 0;
 
         while (true) {
@@ -46,20 +52,20 @@ public class Main {
                         throw new OperationAttemptException("Длина текста в строке " + totalLines + " более 1024 символов");
                     }
                     //Задание2
-                    List<LogData> logDataList = new ArrayList<>();
+                    List<LogEntry> logDataList = new ArrayList<>();
 
-                    LogData logData = LogParser.parseLogLine(line);
+                    LogEntry logData = LogParser.parseLogLine(line);
                     if (logData != null) {
                         logDataList.add(logData);
                     }
 
                     String botNameFromUserAgent = LogParser.extractBotNameFromUserAgent(logData.getUserAgent());
                     if (botNameFromUserAgent != null) {
-                        if (LogData.checkUserAgent(botNameFromUserAgent, YANDEX_BOT_NAME)) {
+                        if (LogEntry.checkUserAgent(botNameFromUserAgent, YANDEX_BOT_NAME)) {
                             yandexBotCount++;
                         }
 
-                        if (LogData.checkUserAgent(botNameFromUserAgent, GOOGLE_BOT_NAME)) {
+                        if (LogEntry.checkUserAgent(botNameFromUserAgent, GOOGLE_BOT_NAME)) {
                             googleBotCount++;
                         }
                     }

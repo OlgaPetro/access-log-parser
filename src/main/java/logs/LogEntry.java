@@ -1,4 +1,6 @@
-public class LogData {
+package logs;
+
+public class LogEntry {
 
     private String ipAddress; //IP-адрес клиента, который сделал запрос к серверу
     private String propertyOne; //Пропущенное свойство 1
@@ -11,22 +13,10 @@ public class LogData {
     private String referer; //Путь к странице, с которой перешли на текущую страницу
     private String userAgent; //Информация о браузере или другом клиенте, который выполнил запрос.
 
-    public LogData(String ipAddress, String propertyOne, String propertySecond, String dateTime, String requestMethod, String requestPath, int responseCode, int dataSize, String referer, String userAgent) {
-        this.ipAddress = ipAddress;
-        this.propertyOne = propertyOne;
-        this.propertySecond = propertySecond;
-        this.dateTime = dateTime;
-        this.requestMethod = requestMethod;
-        this.requestPath = requestPath;
-        this.responseCode = responseCode;
-        this.dataSize = dataSize;
-        this.referer = referer;
-        this.userAgent = userAgent;
-    }
 
-    public LogData() {
+    public LogEntry() {
     }
-  public LogData(String userAgent) {
+  public LogEntry(String userAgent) {
         this.userAgent = userAgent;
     }
 
@@ -119,7 +109,7 @@ public class LogData {
 
     @Override
     public String toString() {
-        return "LogData{" +
+        return "logs.LogEntry{" +
                 "ipAddress='" + ipAddress + 'p' +
                 ", propertyOne='" + propertyOne + '\'' +
                 ", propertySecond='" + propertySecond + '\'' +

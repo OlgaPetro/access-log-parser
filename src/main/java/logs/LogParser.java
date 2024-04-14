@@ -1,7 +1,9 @@
+package logs;
+
 public class LogParser {
 
-    public static LogData parseLogLine(String logLine) {
-        LogData logData = new LogData();
+    public static LogEntry parseLogLine(String logLine) {
+        LogEntry logData = new LogEntry();
 
         String[] lineParts = logLine.split(" ");
         if (lineParts.length >= 10) {
@@ -23,7 +25,7 @@ public class LogParser {
     }
 
     public static String extractBotNameFromUserAgent(String userAgent) {
-        String botName = null;
+        String botName;
 
             String[] botTypeAndVersion = userAgent.split("/");
             botName = botTypeAndVersion[0];
