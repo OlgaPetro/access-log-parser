@@ -1,16 +1,21 @@
 package mehtods;
 
 import logs.LogEntry;
+import logs.UserAgent;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Statistics {
 
     private int totalTraffic;
     private LocalDateTime minTime;
     private LocalDateTime maxTime;
-
+    HashSet<String> addressList = new HashSet<>();HashMap<String, Integer> operationSystemStatistics = new HashMap<>();
     public Statistics() {
         this.totalTraffic = 0;
         this.minTime = LocalDateTime.MAX;
@@ -27,10 +32,46 @@ public class Statistics {
         if (logEntry.getDateTime().isAfter(maxTime)) {
             maxTime = logEntry.getDateTime();
         }
+
+        if (logEntry.getResponseCode() ==200){
+            addressList.add(logEntry.getRequestPath());
+        }
+        UserAgent userAgent = new UserAgent(logEntry.getUserAgentFullData());
+        String operationSystem = userAgent.getOperationSystem();
+        operationSystemStatistics.put(operationSystem, operationSystemStatistics.getOrDefault(operationSystem,
+                0) + 1);
+
+    }
+
+
+
+    public HashMap<String, Double> calculateOperationSystemShare() {
+        HashMap<String, Double> operationSystemShare = new HashMap<>();
+        HashSet<String> allowedSystems = new HashSet<>(Arrays.asList("Chrome", "Safari", "Ubuntu", "OPiOS", "GSA",
+                "SamsungBrowser", "CriOS"));
+
+        if (operationSystemStatistics.size() == 0) {
+            System.out.println("Отсутствуют данные по операционным системам.");
+            return operationSystemShare;
+        }
+
+        int totalSystems = 0;
+        for (int value : operationSystemStatistics.values()) {
+            totalSystems += value;
+        }
+
+        for (Map.Entry<String, Integer> entry : operationSystemStatistics.entrySet()) {
+            if (allowedSystems.contains(entry.getKey())) {
+                double share = (double) entry.getValue() / totalSystems;
+                operationSystemShare.put(entry.getKey(), share);
+            }
+        }
+
+        return operationSystemShare;
     }
 
     public void getTrafficRate() {
-        long diffInHours = Duration.between(minTime, maxTime).toHours();
+        long diffInHours = Duration.between(maxTime,minTime).toHours();
 
         if (diffInHours == 0) {
             System.out.println("Нет промежутка времени и данные не получить");

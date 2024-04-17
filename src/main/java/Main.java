@@ -43,6 +43,8 @@ public class Main {
             int totalLines = 0;
             int yandexBotCount = 0;
             int googleBotCount = 0;
+            List<LogEntry> logDataList = new ArrayList<>();
+            List<UserAgent> agentDataList = new ArrayList<>();
 
             FileReader fileReader;
             try {
@@ -57,7 +59,7 @@ public class Main {
                         throw new OperationAttemptException("Длина текста в строке " + totalLines + " более 1024 символов");
                     }
 
-                    List<LogEntry> logDataList = new ArrayList<>();
+
 
                     LogEntry logData = new LogEntry(line);
                     if (logData != null) {
@@ -67,6 +69,7 @@ public class Main {
 
                     if (logData.getUserAgentFullData() != null || logData.getUserAgentFullData().equals("-")) {
                         UserAgent userAgent = new UserAgent(logData.getUserAgentFullData());
+                        agentDataList.add(userAgent);
                         String botNameFromUserAgent = userAgent.getBotName();
                         if (botNameFromUserAgent != null) {
                             if (LogEntry.checkUserAgent(botNameFromUserAgent, YANDEX_BOT_NAME)) {
@@ -78,8 +81,8 @@ public class Main {
                             }
                         }
                     }
-
                 }
+
                 statistics.getTrafficRate();
                 reader.close();
             } catch (FileNotFoundException e) {
@@ -98,6 +101,9 @@ public class Main {
             System.out.println("Количество запросов от " + GOOGLE_BOT_NAME + " составляет : " + googleBotCount);
             System.out.println("Доля запросов от " + YANDEX_BOT_NAME + " составляет : " + String.format("%.2f", (yandexBotCount * 1.0 / totalBotCount)));
             System.out.println("Доля запросов от " + GOOGLE_BOT_NAME + " составляет : " + String.format("%.2f", (googleBotCount * 1.0 / totalBotCount)));
+            
+
+            System.out.println("Доля операционной системы " + statistics.calculateOperationSystemShare());
             break;
         }
 
