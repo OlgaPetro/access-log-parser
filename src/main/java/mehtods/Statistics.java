@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class Statistics {
 
@@ -19,7 +20,8 @@ public class Statistics {
     HashMap<String, Integer> operationSystemStatistics = new HashMap<>();
     HashMap<String, Integer> browserStatistics = new HashMap<>();
     HashSet<String> nonExistingPages = new HashSet<>();
-
+    private long uniqueIpAddresses;
+    private long browserVisits;
     public Statistics() {
         this.totalTraffic = 0;
         this.minTime = LocalDateTime.MAX;
@@ -54,6 +56,16 @@ public class Statistics {
 
         String browser = userAgent.getBrowser();
         browserStatistics.put(browser, browserStatistics.getOrDefault(browser, 0) + 1);
+        if (logEntry.getResponseCode() == 200) {
+            addressList.add(logEntry.getRequestPath());
+        }
+
+        if (!browser.contains("bot")) {
+            browserVisits++;
+            uniqueIpAddresses += Stream.of(logEntry.getIpAddress())
+                    .distinct()
+                    .count();
+        }
     }
 
     public HashMap<String, Double> calculateOperationSystemShare() {
@@ -110,6 +122,17 @@ public class Statistics {
             double averageTrafficRate = totalTraffic / diffInHours;
             System.out.println("Средний объем трафика за час: " + averageTrafficRate + " байт.");
         }
+
+    }
+    public double calculateAverageVisitsHour() {
+        long diffInHours = Duration.between(maxTime, minTime).toHours();
+        return (double) browserVisits / diffInHours;
     }
 
+    public double calculateAverageVisitsUser() {
+        if (uniqueIpAddresses == 0) {
+            return 0;
+        }
+        return (double) browserVisits / uniqueIpAddresses;
+    }
 }
