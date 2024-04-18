@@ -15,7 +15,11 @@ public class Statistics {
     private int totalTraffic;
     private LocalDateTime minTime;
     private LocalDateTime maxTime;
-    HashSet<String> addressList = new HashSet<>();HashMap<String, Integer> operationSystemStatistics = new HashMap<>();
+    HashSet<String> addressList = new HashSet<>();
+    HashMap<String, Integer> operationSystemStatistics = new HashMap<>();
+    HashMap<String, Integer> browserStatistics = new HashMap<>();
+    HashSet<String> nonExistingPages = new HashSet<>();
+
     public Statistics() {
         this.totalTraffic = 0;
         this.minTime = LocalDateTime.MAX;
@@ -33,7 +37,7 @@ public class Statistics {
             maxTime = logEntry.getDateTime();
         }
 
-        if (logEntry.getResponseCode() ==200){
+        if (logEntry.getResponseCode() == 200) {
             addressList.add(logEntry.getRequestPath());
         }
         UserAgent userAgent = new UserAgent(logEntry.getUserAgentFullData());
@@ -41,9 +45,16 @@ public class Statistics {
         operationSystemStatistics.put(operationSystem, operationSystemStatistics.getOrDefault(operationSystem,
                 0) + 1);
 
+
+        if (logEntry.getResponseCode() == 404) {
+            nonExistingPages.add(logEntry.getRequestPath());
+        }
+
+        operationSystemStatistics.put(operationSystem, operationSystemStatistics.getOrDefault(operationSystem, 0) + 1);
+
+        String browser = userAgent.getBrowser();
+        browserStatistics.put(browser, browserStatistics.getOrDefault(browser, 0) + 1);
     }
-
-
 
     public HashMap<String, Double> calculateOperationSystemShare() {
         HashMap<String, Double> operationSystemShare = new HashMap<>();
@@ -70,8 +81,28 @@ public class Statistics {
         return operationSystemShare;
     }
 
+    public HashMap<String, Double> calculateBrowserShare() {
+        HashMap<String, Double> browserShare = new HashMap<>();
+        if (browserStatistics.size() == 0) {
+            System.out.println("Нет данных по браузерам.");
+            return browserShare;
+        }
+
+        int totalBrowsers = 0;
+        for (int value : browserStatistics.values()) {
+            totalBrowsers += value;
+        }
+
+        for (Map.Entry<String, Integer> entry : browserStatistics.entrySet()) {
+            double share = (double) entry.getValue() / totalBrowsers;
+            browserShare.put(entry.getKey(), share);
+        }
+
+        return browserShare;
+    }
+
     public void getTrafficRate() {
-        long diffInHours = Duration.between(maxTime,minTime).toHours();
+        long diffInHours = Duration.between(maxTime, minTime).toHours();
 
         if (diffInHours == 0) {
             System.out.println("Нет промежутка времени и данные не получить");
@@ -80,4 +111,5 @@ public class Statistics {
             System.out.println("Средний объем трафика за час: " + averageTrafficRate + " байт.");
         }
     }
+
 }
