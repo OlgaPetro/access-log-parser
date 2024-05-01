@@ -19,8 +19,10 @@ public class Statistics {
     HashMap<String, Integer> operationSystemStatistics = new HashMap<>();
     HashMap<String, Integer> browserStatistics = new HashMap<>();
     HashSet<String> nonExistingPages = new HashSet<>();
-    private long uniqueIpAddresses;
-    private long browserVisits;
+
+    private long nonBotVisits;
+    private long errorCodeVisits;
+    private long uniqueRealUsers;
 
     public HashSet<String> getNonExistingPages() {
         return nonExistingPages;
@@ -63,13 +65,14 @@ public class Statistics {
             addressList.add(logEntry.getRequestPath());
         }
 
-      //Cannot invoke "String.contains(java.lang.CharSequence)" because "browser" is null
-     /*   if (!browser.contains("bot") ) {
-            browserVisits++;
-            uniqueIpAddresses += Stream.of(logEntry.getIpAddress())
-                    .distinct()
-                    .count();
-        }*/
+        if (userAgent.getBotName() != null && !userAgent.getBotName().contains("bot")) {
+            nonBotVisits++;
+            uniqueRealUsers++;
+        }
+
+        if (logEntry.getResponseCode() >= 400 && logEntry.getResponseCode() <= 500) {
+            errorCodeVisits++;
+        }
     }
 
 
@@ -136,15 +139,18 @@ public class Statistics {
         }
 
     }
-    public double calculateAverageVisitsHour() {
-        long diffInHours = Duration.between(maxTime, minTime).toHours();
-        return (double) browserVisits / diffInHours;
+
+    public double calculateAverageNonBotVisitsHour() {
+        long diffInHours = Duration.between(minTime, maxTime).toHours();
+        return (double) nonBotVisits / diffInHours;
     }
 
-    public double calculateAverageVisitsUser() {
-        if (uniqueIpAddresses == 0) {
-            return 0;
-        }
-        return (double) browserVisits / uniqueIpAddresses;
+    public double calculateAverageErrorCodeVisitsHour() {
+        long diffInHours = Duration.between(minTime, maxTime).toHours();
+        return (double) errorCodeVisits / diffInHours;
+    }
+
+    public double calculateAverageVisitsPerRealUser() {
+        return (double) nonBotVisits / uniqueRealUsers;
     }
 }

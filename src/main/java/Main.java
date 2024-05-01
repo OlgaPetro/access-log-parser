@@ -102,12 +102,24 @@ public class Main {
             System.out.println("Доля запросов от " + YANDEX_BOT_NAME + " составляет: " + String.format("%.2f", (yandexBotCount * 1.0 / totalBotCount)));
             System.out.println("Доля запросов от " + GOOGLE_BOT_NAME + " составляет: " + String.format("%.2f", (googleBotCount * 1.0 / totalBotCount)));
 
+            System.out.println("Трафик: ");
+            statistics.getTrafficRate();
+            System.out.println();
 
             System.out.println("Доля операционной системы " + statistics.calculateOperationSystem());
             System.out.println("Доля браузеров системы " + statistics.calculateBrowser());
 
             System.out.println();
             System.out.println("Несуществующие страницы " + statistics.getNonExistingPages());
+
+
+            System.out.println();
+            System.out.println("Расчета среднего количества посещений не ботами в час:" + statistics.calculateAverageNonBotVisitsHour());
+
+            System.out.println("Расчет среднего количества ошибочных запросов в час:" + statistics.calculateAverageErrorCodeVisitsHour());
+
+            System.out.println("Расчет среднего количества посещений на одного реального пользователя соответственно:" + statistics.calculateAverageVisitsPerRealUser());
+
 
             InMemory inMemory = new InMemory();
             inMemory.save(logDataList);
