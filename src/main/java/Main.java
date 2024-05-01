@@ -1,6 +1,7 @@
 import exeptions.OperationAttemptException;
 import logs.LogEntry;
 import logs.UserAgent;
+import mehtods.InMemory;
 import mehtods.Statistics;
 
 import java.io.*;
@@ -59,13 +60,12 @@ public class Main {
                         throw new OperationAttemptException("Длина текста в строке " + totalLines + " более 1024 символов");
                     }
 
-
-
                     LogEntry logData = new LogEntry(line);
                     if (logData != null) {
                         logDataList.add(logData);
-                        statistics.addEntry(logData);
+                        statistics.addEntry(logData);//ошибка
                     }
+
 
                     if (logData.getUserAgentFullData() != null || logData.getUserAgentFullData().equals("-")) {
                         UserAgent userAgent = new UserAgent(logData.getUserAgentFullData());
@@ -97,13 +97,21 @@ public class Main {
 
             System.out.println("Количество строк в файле: " + totalLines);
             System.out.println("Сумма YandexBot и Googlebot составляет: " + totalBotCount);
-            System.out.println("Количество запросов от " + YANDEX_BOT_NAME + " составляет : " + yandexBotCount);
-            System.out.println("Количество запросов от " + GOOGLE_BOT_NAME + " составляет : " + googleBotCount);
-            System.out.println("Доля запросов от " + YANDEX_BOT_NAME + " составляет : " + String.format("%.2f", (yandexBotCount * 1.0 / totalBotCount)));
-            System.out.println("Доля запросов от " + GOOGLE_BOT_NAME + " составляет : " + String.format("%.2f", (googleBotCount * 1.0 / totalBotCount)));
-            
+            System.out.println("Количество запросов от " + YANDEX_BOT_NAME + " составляет: " + yandexBotCount);
+            System.out.println("Количество запросов от " + GOOGLE_BOT_NAME + " составляет: " + googleBotCount);
+            System.out.println("Доля запросов от " + YANDEX_BOT_NAME + " составляет: " + String.format("%.2f", (yandexBotCount * 1.0 / totalBotCount)));
+            System.out.println("Доля запросов от " + GOOGLE_BOT_NAME + " составляет: " + String.format("%.2f", (googleBotCount * 1.0 / totalBotCount)));
 
-            System.out.println("Доля операционной системы " + statistics.calculateOperationSystemShare());
+
+            System.out.println("Доля операционной системы " + statistics.calculateOperationSystem());
+            System.out.println("Доля браузеров системы " + statistics.calculateBrowser());
+
+            System.out.println();
+            System.out.println("Несуществующие страницы " + statistics.getNonExistingPages());
+
+            InMemory inMemory = new InMemory();
+            inMemory.save(logDataList);
+            inMemory.saveAgent(agentDataList);
             break;
         }
 

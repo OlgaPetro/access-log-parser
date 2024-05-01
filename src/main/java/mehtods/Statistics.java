@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class Statistics {
 
@@ -22,6 +21,11 @@ public class Statistics {
     HashSet<String> nonExistingPages = new HashSet<>();
     private long uniqueIpAddresses;
     private long browserVisits;
+
+    public HashSet<String> getNonExistingPages() {
+        return nonExistingPages;
+    }
+
     public Statistics() {
         this.totalTraffic = 0;
         this.minTime = LocalDateTime.MAX;
@@ -52,7 +56,6 @@ public class Statistics {
             nonExistingPages.add(logEntry.getRequestPath());
         }
 
-        operationSystemStatistics.put(operationSystem, operationSystemStatistics.getOrDefault(operationSystem, 0) + 1);
 
         String browser = userAgent.getBrowser();
         browserStatistics.put(browser, browserStatistics.getOrDefault(browser, 0) + 1);
@@ -60,32 +63,36 @@ public class Statistics {
             addressList.add(logEntry.getRequestPath());
         }
 
-        if (!browser.contains("bot")) {
+      //Cannot invoke "String.contains(java.lang.CharSequence)" because "browser" is null
+     /*   if (!browser.contains("bot") ) {
             browserVisits++;
             uniqueIpAddresses += Stream.of(logEntry.getIpAddress())
                     .distinct()
                     .count();
-        }
+        }*/
     }
 
-    public HashMap<String, Double> calculateOperationSystemShare() {
+
+    public HashMap<String, Double> calculateOperationSystem() {
         HashMap<String, Double> operationSystemShare = new HashMap<>();
-        HashSet<String> allowedSystems = new HashSet<>(Arrays.asList("Chrome", "Safari", "Ubuntu", "OPiOS", "GSA",
-                "SamsungBrowser", "CriOS"));
+        // Возможные ОС: "Windows", "iPad", "SMART-TV", "Macintosh", "Linux","Android", "iPod", "iPhone","Unknown", "X11"
+        HashSet<String> allowedSystems = new HashSet<>(Arrays.asList("Windows", "Macintosh", "Linux"));
 
         if (operationSystemStatistics.size() == 0) {
             System.out.println("Отсутствуют данные по операционным системам.");
             return operationSystemShare;
         }
 
-        int totalSystems = 0;
-        for (int value : operationSystemStatistics.values()) {
-            totalSystems += value;
+        int totalAllowedSystems = 0;
+        for (String os : allowedSystems) {
+            if (operationSystemStatistics.containsKey(os)) {
+                totalAllowedSystems += operationSystemStatistics.get(os);
+            }
         }
 
         for (Map.Entry<String, Integer> entry : operationSystemStatistics.entrySet()) {
             if (allowedSystems.contains(entry.getKey())) {
-                double share = (double) entry.getValue() / totalSystems;
+                double share = (double) entry.getValue() / totalAllowedSystems;
                 operationSystemShare.put(entry.getKey(), share);
             }
         }
@@ -93,21 +100,26 @@ public class Statistics {
         return operationSystemShare;
     }
 
-    public HashMap<String, Double> calculateBrowserShare() {
+    public HashMap<String, Double> calculateBrowser() {
         HashMap<String, Double> browserShare = new HashMap<>();
+        HashSet<String> allowedBrowser = new HashSet<>(Arrays.asList("Safari", "SamsungBrowser", "Chrome", "HeadlessChrome"));
         if (browserStatistics.size() == 0) {
             System.out.println("Нет данных по браузерам.");
             return browserShare;
         }
 
         int totalBrowsers = 0;
-        for (int value : browserStatistics.values()) {
-            totalBrowsers += value;
+        for (Map.Entry<String, Integer> entry : browserStatistics.entrySet()) {
+            if (allowedBrowser.contains(entry.getKey())) {
+                totalBrowsers += entry.getValue();
+            }
         }
 
         for (Map.Entry<String, Integer> entry : browserStatistics.entrySet()) {
-            double share = (double) entry.getValue() / totalBrowsers;
-            browserShare.put(entry.getKey(), share);
+            if (allowedBrowser.contains(entry.getKey())) {
+                double share = (double) entry.getValue() / totalBrowsers;
+                browserShare.put(entry.getKey(), share);
+            }
         }
 
         return browserShare;
