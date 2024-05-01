@@ -120,6 +120,9 @@ public class Main {
 
             System.out.println("Расчет среднего количества посещений на одного реального пользователя соответственно:" + statistics.calculateAverageVisitsPerRealUser());
 
+            System.out.println();
+            System.out.println("Пиковая посещаемость сайта (в секунду):" + statistics.calculatePeakNonBotVisitsPerSecond());
+            System.out.println("Максимальная посещаемость одним пользователем:" + statistics.calculateMaxVisitsPerRealUser());
 
             InMemory inMemory = new InMemory();
             inMemory.save(logDataList);

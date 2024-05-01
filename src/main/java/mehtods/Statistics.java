@@ -5,10 +5,8 @@ import logs.UserAgent;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Statistics {
 
@@ -152,5 +150,28 @@ public class Statistics {
 
     public double calculateAverageVisitsPerRealUser() {
         return (double) nonBotVisits / uniqueRealUsers;
+    }
+
+    public int calculatePeakNonBotVisitsPerSecond() {
+        Map<Integer, Long> visitsPerSecond = addressList.stream()
+                .filter(path -> path.startsWith("/"))
+                .collect(Collectors.groupingBy(path -> path.hashCode() % 1000, Collectors.counting()));
+
+        return visitsPerSecond.values().stream()
+                .mapToInt(Long::intValue)
+                .max()
+                .orElse(0);
+    }
+
+
+    public int calculateMaxVisitsPerRealUser() {
+        Map<String, Long> visitsPerUser = addressList.stream()
+                .filter(path -> path.startsWith("/"))
+                .collect(Collectors.groupingBy(path -> String.valueOf(path.hashCode() % 1000), Collectors.counting())); // Группируем по пользователям
+
+        return visitsPerUser.values().stream()
+                .mapToInt(Long::intValue)
+                .max()
+                .orElse(0);
     }
 }
